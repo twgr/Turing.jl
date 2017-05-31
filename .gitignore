@@ -1,8 +1,0 @@
-*.dylib
-*.so
-*.orig
-*.png
-tmp/
-
-*.jld
-.ipynb_checkpoints
