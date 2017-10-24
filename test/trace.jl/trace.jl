@@ -19,7 +19,7 @@ function f2()
     ct = current_trace()
     vn = VarName(gensym(), :x, "[$n]", 1)
     Turing.assume(spl, dist, vn, ct.vi); n += 1;
-    produce(t[1]);
+    put!(current_task().storage[:turing_chnl], t[1]);
     vn = VarName(gensym(), :x, "[$n]", 1)
     Turing.assume(spl, dist, vn, ct.vi); n += 1;
     t[1] = 1 + t[1]

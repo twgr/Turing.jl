@@ -172,7 +172,7 @@ assume{A<:Union{PG,SMC},D<:Distribution}(spl::Sampler{A}, dists::Vector{D}, vn::
   error("[Turing] PG and SMC doesn't support vectorizing assume statement")
 
 observe{T<:Union{PG,SMC}}(spl::Sampler{T}, dist::Distribution, value, vi) =
-  produce(logpdf(dist, value))
+  put!(current_task().storage[:turing_chnl], logpdf(dist, value))
 
 observe{A<:Union{PG,SMC},D<:Distribution}(spl::Sampler{A}, ds::Vector{D}, value::Any, vi::VarInfo) =
   error("[Turing] PG and SMC doesn't support vectorizing observe statement")

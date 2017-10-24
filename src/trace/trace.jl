@@ -46,10 +46,11 @@ end
 function (::Type{Trace{T}}){T}(f::Function)
   res = Trace{T}();
   # Task(()->f());
-  res.task = Task( () -> begin res=f(); produce(Val{:done}); res; end )
+  res.task = Task( () -> begin res=f(); put!(current_task().storage[:turing_chnl], Val{:done}); res; end )
   if isa(res.task.storage, Void)
     res.task.storage = ObjectIdDict()
   end
+  res.task.storage[:turing_chnl]  = Channel(0); schedule(res.task);
   res.task.storage[:turing_trace] = res # create a backward reference in task_local_storage
   res
 end
@@ -61,10 +62,11 @@ function (::Type{Trace{T}}){T}(f::Function, spl::Sampler, vi :: VarInfo)
   res.vi = deepcopy(vi)
   res.vi.index = 0
   res.vi.num_produce = 0
-  res.task = Task( () -> begin vi_new=f(vi, spl); produce(Val{:done}); vi_new; end )
+  res.task = Task( () -> begin vi_new=f(vi, spl); put!(current_task().storage[:turing_chnl], Val{:done}); vi_new; end )
   if isa(res.task.storage, Void)
     res.task.storage = ObjectIdDict()
   end
+  res.task.storage[:turing_chnl]  = Channel(0); schedule(res.task);
   res.task.storage[:turing_trace] = res # create a backward reference in task_local_storage
   res
 end
@@ -73,7 +75,10 @@ const TraceR = Trace{:R} # Task Copy
 const TraceC = Trace{:C} # Replay
 
 # step to the next observe statement, return log likelihood
-Base.consume(t::Trace) = (t.vi.num_produce += 1; Base.consume(t.task))
+Base.consume(t::Trace) = begin
+    t.vi.num_produce += 1;
+    Base.take!(t.task.storage[:turing_chnl])
+end
 
 # Task copying version of fork for both TraceR and TraceC.
 function forkc(trace :: Trace)

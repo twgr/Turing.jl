@@ -6,7 +6,7 @@ function f_cta()
   t = TArray(Int, 1);
   t[1] = 0;
   while true
-    produce(t[1])
+    put!(current_task().storage[:turing_chnl], t[1])
     t[1]
     t[1] = 1 + t[1]
   end
@@ -14,12 +14,12 @@ end
 
 t = Task(f_cta)
 
-consume(t); consume(t)
+take!(t.storage[:turing_chnl]); take!(t.storage[:turing_chnl])
 a = copy(t);
-consume(a); consume(a)
+take!(a.storage[:turing_chnl]); take!(a.storage[:turing_chnl])
 
-Base.@assert consume(t) == 2
-Base.@assert consume(a) == 4
+Base.@assert take!(t.storage[:turing_chnl]) == 2
+Base.@assert take!(a.storage[:turing_chnl]) == 4
 
 # Base.@assert TArray(Float64,  5)[1] != 0 REVIEW: can we remove this? (Kai)
 Base.@assert tzeros(Float64, 5)[1]==0

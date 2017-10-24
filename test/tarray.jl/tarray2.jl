@@ -25,16 +25,16 @@ function f()
     u = unique(classes[1:i])
     Base.@assert maximum(u) == length(u)
     # println("[$(current_task())] classes: ", classes[1:i], "; urn:", urn.counts) REVIEW: can we remove this (Kai)
-    produce(classes[i])
+    put!(current_task().storage[:turing_chnl], classes[i])
   end
 end
 
 t = Task(f)
 
-consume(t);
+take!(t.storage[:turing_chnl]);
 a = [copy(t) for i = 1:10];
 
 for i =1:20
-  consume(t);
-  map((x)->consume(x),a)
+  take!(t.storage[:turing_chnl]);
+  map((x)->take!(x.storage[:turing_chnl]),a)
 end

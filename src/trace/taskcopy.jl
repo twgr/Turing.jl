@@ -32,6 +32,14 @@ function Base.copy(t::Task)
   newt.state = t.state
   newt.result = t.result
   newt.parent = t.parent
+  newt.storage[:turing_chnl] = deepcopy(t.storage[:turing_chnl]) # Channel(0);
+  newt.storage[:turing_chnl].putters[1] = newt
+  push!(newt.storage[:turing_chnl].takers, current_task())
+  bind(newt.storage[:turing_chnl], newt)
+  if istaskstarted(t)
+      schedule(newt);
+      newt.state = :queued
+  end
   if :last in fieldnames(t)
     newt.last = nothing
   end
