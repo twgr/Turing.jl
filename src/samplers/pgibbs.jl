@@ -156,10 +156,14 @@ assume{T<:Union{PG,SMC}}(spl::Sampler{T}, dist::Distribution, vn::VarName, _::Va
     else
       checkindex(vn, vi, spl)
       updategid!(vi, vn, spl)
-      vi[vn]
+      r = vi[vn]
+      acclogp!(vi, logpdf_with_trans(dist, r, istrans(vi, vn)))
+      r
     end
   else
-    vi[vn]
+    r = vi[vn]
+    acclogp!(vi, logpdf_with_trans(dist, r, istrans(vi, vn)))
+    r
   end
 end
 
